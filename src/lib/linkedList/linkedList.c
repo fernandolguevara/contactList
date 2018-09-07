@@ -46,7 +46,7 @@ void forEach_LinkedList(LinkedList list, VisitorFn visitorFn) {
 
 void *find_LinkedList(LinkedList list, CompareValueFn compareValueFn, void *value) {
   for (LinkedNode *node = list; node != NULL; node = node->next) {
-    if (compareValueFn(node->data, value) == 1) {
+    if (compareValueFn(node->data, value)) {
       return node->data;
     }
   }

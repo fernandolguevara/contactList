@@ -40,12 +40,7 @@ LinkedList push_LinkedList(LinkedList list, void *data);
 void forEach_LinkedList(LinkedList list, VisitorFn visitorFn);
 
 /**
- * Find an element in the list. 
- */
-void *find_LinkedList(LinkedList list, CompareValueFn compareValueFn, void *value);
-
-/**
- * Fin an element in the list where the compare value fn return 1. 
+ * Fin an element in the list where the compare value fn returns true. 
  */
 void *find_LinkedList(LinkedList list, CompareValueFn compareValueFn, void *value);
 

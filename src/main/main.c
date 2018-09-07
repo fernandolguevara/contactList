@@ -4,6 +4,11 @@
 #include "../lib/linkedList/linkedList.h"
 #include "../lib/contact/contact.h"
 
+/**
+ * WRAPPERS (I could write a separate file...)
+ * To connect Contact with LinkeList.
+ **/
+
 void print_Contact_wrapper(void *data) {
   Contact contact = (Contact)data;
 
@@ -24,19 +29,31 @@ int compare_ContactPhoneByValue_wrapper(void *data, void *value) {
   return compare_ContactPhoneByValue(contact, castedValue) == 0;
 }
 
-void clearScreen() {
-  system("clear");
+/**
+ * UTIL (I could write a separate file...)
+ * Some utilities.
+ **/
+
+float averageAge_Contacts (LinkedList list) {
+  /** I wanted to declare a reduce_LinkedList function 
+   * that works as a fold to calculate the sum but I couldn't find the way to pass
+   * a function as parameter that returns a void pointer.
+   **/
+  int sum = 0;
+  Contact contact;
+
+  for (LinkedNode *node = list; node != NULL; node = node->next) {
+    contact = (Contact)(node->data);
+    sum += contact->age;
+  }
+
+  /** I could calculate the length above but I like to module all the function
+   * in cases where optimization is not needed.
+   **/
+  return ((float)sum)/length_LinkedList(list);
 }
 
-int print_mainMenu() {
-  int option;
-
-  printf("1. Show all.\n2. Add a contact.\n3. Find contact.\n4. Delete contact.\n5. Edit contact.\n6. Import file.\n7. Export file.\n0. Exit.\n");
-  scanf("%d", &option);
-
-  return option;
-}
-
+// I want to control the Contact string attributes memory alocation (like in free_Contact).
 char *convert_char_array_to_pointer(char array[]) {
   char *pointer = malloc(sizeof(char) * strlen(array));
 
@@ -45,40 +62,16 @@ char *convert_char_array_to_pointer(char array[]) {
   return pointer;
 }
 
-Contact askFor_ContactData(Contact contact) {
-  char buffer[50];
-
-  printf("First name: ");
-  scanf("%s", buffer);
-  contact->firstName = convert_char_array_to_pointer(buffer);
-
-  printf("Last name: ");
-  scanf("%s", buffer);
-  contact->lastName = convert_char_array_to_pointer(buffer);
-
-  printf("Age: ");
-  scanf("%d", &(contact->age));
-
-  printf("Gender: ");
-  scanf("%s", buffer);
-  contact->gender = convert_char_array_to_pointer(buffer);
-
-  printf("Phone (MUST be unique): ");
-  scanf("%s", buffer);
-  contact->phone = convert_char_array_to_pointer(buffer);
-
-  printf("Email: ");
-  scanf("%s", buffer);
-  contact->email = convert_char_array_to_pointer(buffer);
-
-  printf("Birthday: ");
-  scanf("%s", buffer);
-  contact->birthday = convert_char_array_to_pointer(buffer);
-
-  return contact;
-}
+/**
+ * FILE READ/WRITE (I could write a separate file...)
+ **/
 
 LinkedList importContacts(LinkedList list) {
+  /** I wanted to use the foreach_LinkedList function 
+   * but I did not know how to pass the FILE (as parameter?) to the VisitorFn
+   * before passing it to the foreach_LinkedList function.
+   **/
+
   FILE *f = fopen("contacts.txt", "r");
   Contact contact;
   char buffer[50];
@@ -115,6 +108,10 @@ LinkedList importContacts(LinkedList list) {
 }
 
 void exportContacts(LinkedList list) {
+  /** I wanted to use the foreach_LinkedList function 
+   * but I did not know how to pass the FILE (as parameter?) to the VisitorFn
+   * before passing it to the foreach_LinkedList function.
+   **/
   FILE *f = fopen("contacts.txt", "w");
   Contact contact; 
 
@@ -127,11 +124,66 @@ void exportContacts(LinkedList list) {
 
   for (LinkedNode *node = list; node != NULL; node = node->next) {
     contact = (Contact)node->data;
-    fprintf(f, "%s\n%s\n%d\n%s\n%s\n%s\n%s", contact->firstName, contact->lastName, contact->age, contact->gender, contact->phone, contact->email, contact->birthday);
+    fprintf(f, "%s\n%s\n%d\n%s\n%s\n%s\n%s\n", contact->firstName, contact->lastName, contact->age, contact->gender, contact->phone, contact->email, contact->birthday);
   }
 
   fclose(f);
 }
+
+/**
+ * UI (I could write a separate file...)
+ * To connect Contact with LinkeList.
+ **/
+
+void clearScreen() {
+  system("clear");
+}
+
+int print_mainMenu() {
+  int option;
+
+  printf("1. Show all.\n2. Add a contact.\n3. Find contact.\n4. Delete contact.\n5. Edit contact.\n6. Import file.\n7. Export file.\n8. Average age.\n0. Exit.\n");
+  scanf("%d", &option);
+
+  return option;
+}
+
+Contact askFor_ContactData(Contact contact) {
+  char buffer[50];
+
+  printf("First name: ");
+  scanf("%s", buffer);
+  contact->firstName = convert_char_array_to_pointer(buffer);
+
+  printf("Last name: ");
+  scanf("%s", buffer);
+  contact->lastName = convert_char_array_to_pointer(buffer);
+
+  printf("Age: ");
+  scanf("%d", &(contact->age));
+
+  printf("Gender: ");
+  scanf("%s", buffer);
+  contact->gender = convert_char_array_to_pointer(buffer);
+
+  printf("Phone (MUST be unique): ");
+  scanf("%s", buffer);
+  contact->phone = convert_char_array_to_pointer(buffer);
+
+  printf("Email: ");
+  scanf("%s", buffer);
+  contact->email = convert_char_array_to_pointer(buffer);
+
+  printf("Birthday: ");
+  scanf("%s", buffer);
+  contact->birthday = convert_char_array_to_pointer(buffer);
+
+  return contact;
+}
+
+/**
+ * MAIN
+ **/
 
 int main(int argc, char *argv[]) {
   LinkedList list = new_LinkedList();
@@ -203,13 +255,22 @@ int main(int argc, char *argv[]) {
       case 6:
         clearScreen();
         list = importContacts(list);
-        printf("Done.");
+        printf("Done.\n");
         getchar();
         break;
       case 7:
         clearScreen();
         exportContacts(list);
-        printf("Done.");
+        printf("Done.\n");
+        getchar();
+        break;
+      case 8:
+        clearScreen();
+        if (isEmpty_LinkedList(list)) {
+          printf("Empty.\n");
+        } else {
+          printf("Average age: %.2f\n", averageAge_Contacts(list));
+        }
         getchar();
         break;
     }
