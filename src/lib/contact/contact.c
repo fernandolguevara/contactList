@@ -35,3 +35,7 @@ void print_Contact(Contact contact) {
 int compare_ContactPhoneByValue(Contact contact, char *value) {
   return strcmp(contact->phone, value);
 }
+
+void writeInFile_Contact(Contact contact, FILE *f) {
+  fprintf(f, "%s\n%s\n%d\n%s\n%s\n%s\n%s\n", contact->firstName, contact->lastName, contact->age, contact->gender, contact->phone, contact->email, contact->birthday);
+}

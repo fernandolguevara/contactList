@@ -34,7 +34,7 @@ void writeInFile_Contact_wrapper(void *data, va_list ap) {
   Contact contact = (Contact)data;
   FILE *f = va_arg(ap, FILE*);
 
-  fprintf(f, "%s\n%s\n%d\n%s\n%s\n%s\n%s\n", contact->firstName, contact->lastName, contact->age, contact->gender, contact->phone, contact->email, contact->birthday);
+  writeInFile_Contact(contact, f);
 }
 
 /**
@@ -52,7 +52,8 @@ float averageAge_Contacts (LinkedList list) {
     sum += contact->age;
   }
 
-  /** I could calculate the length above but I like to module all the function
+  /** 
+   * I could calculate the length above but I like to module all the function
    * in cases where optimization is not needed.
    **/
   return ((float)sum)/length_LinkedList(list);
@@ -124,8 +125,7 @@ void exportContacts(LinkedList list) {
 }
 
 /**
- * UI (I could write a separate file...)
- * To connect Contact with LinkeList.
+ * UI
  **/
 
 void clearScreen() {
@@ -135,8 +135,11 @@ void clearScreen() {
 int print_mainMenu() {
   int option;
 
+  clearScreen();
+
   printf("1. Show all.\n2. Add a contact.\n3. Find contact.\n4. Delete contact.\n5. Edit contact.\n6. Import file.\n7. Export file.\n8. Average age.\n0. Exit.\n");
   scanf("%d", &option);
+  getchar();
 
   return option;
 }
@@ -174,97 +177,163 @@ Contact askFor_ContactData(Contact contact) {
   return contact;
 }
 
+void showAllContacts_screen(LinkedList list) {
+  clearScreen();
+
+  forEach_LinkedList(list, print_Contact_wrapper);
+
+  getchar();
+}
+
+Contact addContact_screen() {
+  Contact contact = new_Contact();
+
+  clearScreen();
+
+  return askFor_ContactData(contact);
+}
+
+void findContact_screen(LinkedList list) {
+  char buffer[50];
+  void *data;
+
+  clearScreen();
+
+  printf("Phone: ");
+  scanf("%s", buffer);
+  getchar();
+
+  data = find_LinkedList(list, compare_ContactPhoneByValue_wrapper, buffer);
+
+  if (data) {
+    print_Contact_wrapper(data, NULL);
+  } else {
+    printf("Not found.\n");
+  }
+
+  getchar();
+}
+
+LinkedList deleteContact_screen(LinkedList list) {
+  char buffer[50];
+  void *data;
+  Contact contact;
+
+  clearScreen();
+
+  printf("Phone: ");
+  scanf("%s", buffer);
+  getchar();
+
+  data = find_LinkedList(list, compare_ContactPhoneByValue_wrapper, buffer);
+
+  if (data) {
+    list = delete_LinkedList(list, data);
+    contact = (Contact)data;
+    free_Contact(contact);
+
+    printf("Deleted contact.");
+  } else {
+    printf("Not found.\n");
+  }
+
+  getchar();
+
+  return list;
+}
+
+LinkedList editContact_screen(LinkedList list) {
+  char buffer[50];
+  void *data;
+  Contact contact;
+  
+  clearScreen();
+
+  printf("Phone: ");
+  scanf("%s", buffer);
+  getchar();
+
+  data = find_LinkedList(list, compare_ContactPhoneByValue_wrapper, buffer);
+
+  if (data) {
+    contact = (Contact)data;
+    contact = askFor_ContactData(contact);
+  } else {
+    printf("Not found.\n");
+  }
+
+  getchar();
+
+  return list;
+}
+
+LinkedList importContacts_screen(LinkedList list) {
+  clearScreen();
+
+  list = importContacts(list);
+
+  printf("Done.\n");
+  getchar();
+
+  return list;
+}
+
+void exportContacts_screen(LinkedList list) {
+  clearScreen();
+
+  exportContacts(list);
+
+  printf("Done.\n");
+  getchar();
+}
+
+void averageContactsAge_screen(LinkedList list) {
+  clearScreen();
+
+  if (isEmpty_LinkedList(list)) {
+    printf("Empty.\n");
+  } else {
+    printf("Average age: %.2f\n", averageAge_Contacts(list));
+  }
+
+  getchar();
+}
+
 /**
  * MAIN
  **/
 
 int main(int argc, char *argv[]) {
   LinkedList list = new_LinkedList();
-  void *data;
-  Contact contact;
   int option = -1;
-  char buffer[50];
 
   while(option != 0) {
-    clearScreen();
     option = print_mainMenu();
-    getchar();
 
     switch(option) {
       case 1:
-        clearScreen();
-        forEach_LinkedList(list, print_Contact_wrapper);
-        getchar();
+        showAllContacts_screen(list);
         break;
       case 2:
-        clearScreen();
-        contact = new_Contact();
-        contact = askFor_ContactData(contact);
-        list = push_LinkedList(list, contact);
+        list = push_LinkedList(list, addContact_screen());
         break;
       case 3:
-        clearScreen();
-        printf("Phone: ");
-        scanf("%s", buffer);
-        getchar();
-        data = find_LinkedList(list, compare_ContactPhoneByValue_wrapper, buffer);
-        if (data) {
-          print_Contact_wrapper(data, NULL);
-        } else {
-          printf("Not found.\n");
-        }
-        getchar();
+        findContact_screen(list);
         break;
       case 4:
-        clearScreen();
-        printf("Phone: ");
-        scanf("%s", buffer);
-        getchar();
-        data = find_LinkedList(list, compare_ContactPhoneByValue_wrapper, buffer);
-        if (data) {
-          list = delete_LinkedList(list, data);
-          contact = (Contact)data;
-          free_Contact(contact);
-          printf("Deleted contact.");
-        } else {
-          printf("Not found.\n");
-        }
-        getchar();
+        list = deleteContact_screen(list);
         break;
       case 5:
-        clearScreen();
-        printf("Phone: ");
-        scanf("%s", buffer);
-        getchar();
-        data = find_LinkedList(list, compare_ContactPhoneByValue_wrapper, buffer);
-        if (data) {
-          contact = (Contact)data;
-          contact = askFor_ContactData(contact);
-        } else {
-          printf("Not found.\n");
-        }
-        getchar();
+        list = editContact_screen(list);
         break;
       case 6:
-        clearScreen();
-        list = importContacts(list);
-        printf("Done.\n");
-        getchar();
+        list = importContacts_screen(list);
         break;
       case 7:
-        clearScreen();
-        exportContacts(list);
-        printf("Done.\n");
-        getchar();
+        exportContacts_screen(list);
         break;
       case 8:
-        clearScreen();
-        if (isEmpty_LinkedList(list)) {
-          printf("Empty.\n");
-        } else {
-          printf("Average age: %.2f\n", averageAge_Contacts(list));
-        }
-        getchar();
+        averageContactsAge_screen(list);
         break;
     }
   }

@@ -37,4 +37,9 @@ void print_Contact(Contact contact);
  */
 int compare_ContactPhoneByValue(Contact contact, char *value);
 
+/**
+ * Writes the Contact in a file.
+ */
+void writeInFile_Contact(Contact contact, FILE *f);
+
 #endif /* __CONTACT_H__ */
