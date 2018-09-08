@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "../lib/linkedList/linkedList.h"
 #include "../lib/contact/contact.h"
 
@@ -64,6 +65,36 @@ float averageAge_Contacts (LinkedList list) {
    * in cases where optimization is not needed.
    **/
   return ((float)sum)/length_LinkedList(list);
+}
+
+int maxAge_Contacts (LinkedList list) {
+  int max = INT_MIN;
+  Contact contact;
+
+  for (LinkedNode *node = list; node != NULL; node = node->next) {
+    contact = (Contact)(node->data);
+    
+    if (contact->age > max) {
+      max = contact->age;
+    }
+  }
+
+  return max;
+}
+
+int minAge_Contacts (LinkedList list) {
+  int min = INT_MAX;
+  Contact contact;
+
+  for (LinkedNode *node = list; node != NULL; node = node->next) {
+    contact = (Contact)(node->data);
+    
+    if (contact->age < min) {
+      min = contact->age;
+    }
+  }
+
+  return min;
 }
 
 // I want to control the Contact string attributes memory alocation (like in free_Contact).
@@ -144,7 +175,7 @@ int print_mainMenu() {
 
   clearScreen();
 
-  printf("1. Show all.\n2. Add a contact.\n3. Find contact.\n4. Delete contact.\n5. Edit contact.\n6. Import file.\n7. Export file.\n8. Average age.\n9. Sort by attribute.\n0. Exit.\n");
+  printf("1. Show all.\n2. Add a contact.\n3. Find contact.\n4. Delete contact.\n5. Edit contact.\n6. Import file.\n7. Export file.\n8. Average age.\n9. Sort by attribute.\n10. Max age.\n11. Min age.\n0. Exit.\n");
   scanf("%d", &option);
   getchar();
 
@@ -342,6 +373,30 @@ void sortContactsByAttribute_screen(LinkedList list) {
   getchar();
 }
 
+void maxAge_screen(LinkedList list) {
+  clearScreen();
+
+  if (isEmpty_LinkedList(list)) {
+    printf("Empty.\n");
+  } else {
+    printf("Max age: %d\n", maxAge_Contacts(list));
+  }
+
+  getchar();
+}
+
+void minAge_screen(LinkedList list) {
+  clearScreen();
+
+  if (isEmpty_LinkedList(list)) {
+    printf("Empty.\n");
+  } else {
+    printf("Max age: %d\n", minAge_Contacts(list));
+  }
+
+  getchar();
+}
+
 /**
  * MAIN
  **/
@@ -380,6 +435,12 @@ int main(int argc, char *argv[]) {
         break;
       case 9:
         sortContactsByAttribute_screen(list);
+        break;
+      case 10:
+        maxAge_screen(list);
+        break;
+      case 11:
+        minAge_screen(list);
         break;
     }
   }
