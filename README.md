@@ -1,5 +1,7 @@
 # Contacts
 
+Juan Pablo Marengo - LCC
+
 Data structures I's final project.
 
 ## Build

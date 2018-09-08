@@ -51,7 +51,10 @@ int compare_Contact_wrapper(void* a, void* b, va_list ap) {
  **/
 
 float averageAge_Contacts (LinkedList list) {
-  // I wanted to declare a reduceToInt_LinkedList function
+  /** 
+   * I wanted to declare a reduce_LinkedList function, 
+   * but the way it occured to me for returning any type wasn't nice (struct an enum)
+   **/
   int sum = 0;
   Contact contact;
 
