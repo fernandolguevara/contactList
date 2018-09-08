@@ -37,6 +37,13 @@ void writeInFile_Contact_wrapper(void *data, va_list ap) {
   writeInFile_Contact(contact, f);
 }
 
+int compare_Contact_wrapper(void* a, void* b, va_list ap) {
+  Contact contactA = (Contact)a, contactB = (Contact)b;
+  Compare_ContactFn compare_ContactFn = va_arg(ap, Compare_ContactFn);
+
+  return compare_ContactFn(contactA, contactB);
+}
+
 /**
  * UTIL
  * Some utilities.
@@ -137,7 +144,7 @@ int print_mainMenu() {
 
   clearScreen();
 
-  printf("1. Show all.\n2. Add a contact.\n3. Find contact.\n4. Delete contact.\n5. Edit contact.\n6. Import file.\n7. Export file.\n8. Average age.\n0. Exit.\n");
+  printf("1. Show all.\n2. Add a contact.\n3. Find contact.\n4. Delete contact.\n5. Edit contact.\n6. Import file.\n7. Export file.\n8. Average age.\n9. Sort by attribute.\n0. Exit.\n");
   scanf("%d", &option);
   getchar();
 
@@ -242,7 +249,7 @@ LinkedList deleteContact_screen(LinkedList list) {
   return list;
 }
 
-LinkedList editContact_screen(LinkedList list) {
+void editContact_screen(LinkedList list) {
   char buffer[50];
   void *data;
   Contact contact;
@@ -263,8 +270,6 @@ LinkedList editContact_screen(LinkedList list) {
   }
 
   getchar();
-
-  return list;
 }
 
 LinkedList importContacts_screen(LinkedList list) {
@@ -299,6 +304,44 @@ void averageContactsAge_screen(LinkedList list) {
   getchar();
 }
 
+void sortContactsByAttribute_screen(LinkedList list) {
+  int option;
+
+  clearScreen();
+
+  printf("1. First name.\n2. Last name.\n3. Age.\n4. Gender.\n5. Phone.\n6. Email.\n7. Birthday.\n");
+  scanf("%d", &option);
+  getchar();
+  clearScreen();
+
+  switch(option) {
+    case 1:
+      bubbleSort_LinkedList(list, compare_Contact_wrapper, compareByFirstName_Contact);
+      break;
+    case 2:
+      bubbleSort_LinkedList(list, compare_Contact_wrapper, compareByLastName_Contact);
+      break;
+    case 3:
+      bubbleSort_LinkedList(list, compare_Contact_wrapper, compareByAge_Contact);
+      break;
+    case 4:
+      bubbleSort_LinkedList(list, compare_Contact_wrapper, compareByGender_Contact);
+      break;
+    case 5:
+      bubbleSort_LinkedList(list, compare_Contact_wrapper, compareByPhone_Contact);
+      break;
+    case 6:
+      bubbleSort_LinkedList(list, compare_Contact_wrapper, compareByEmail_Contact);
+      break;
+    case 7:
+      bubbleSort_LinkedList(list, compare_Contact_wrapper, compareByBirthday_Contact);
+      break;
+  }
+
+  forEach_LinkedList(list, print_Contact_wrapper);
+  getchar();
+}
+
 /**
  * MAIN
  **/
@@ -324,7 +367,7 @@ int main(int argc, char *argv[]) {
         list = deleteContact_screen(list);
         break;
       case 5:
-        list = editContact_screen(list);
+        editContact_screen(list);
         break;
       case 6:
         list = importContacts_screen(list);
@@ -334,6 +377,9 @@ int main(int argc, char *argv[]) {
         break;
       case 8:
         averageContactsAge_screen(list);
+        break;
+      case 9:
+        sortContactsByAttribute_screen(list);
         break;
     }
   }

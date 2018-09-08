@@ -92,3 +92,32 @@ int length_LinkedList(LinkedList list) {
 
   return x;
 }
+
+void bubbleSort_LinkedList(LinkedList list, CompareFn compareFn, ...) {
+  va_list ap;
+  int swapped = 1, i; 
+  LinkedNode *head, *last = NULL;
+  void *tmp;
+  
+  if (list != NULL) {
+    while (swapped) { 
+      swapped = 0;
+      head = list;
+
+      while (head->next != last) {
+        va_start(ap, compareFn);
+        if (compareFn(head->data, head->next->data, ap) > 0) {
+          tmp = head->data;
+          head->data = head->next->data;
+          head->next->data = tmp;
+          swapped = 1;
+        }
+        va_end(ap);
+
+        head = head->next;
+      } 
+
+      last = head;
+    }  
+  }
+}
