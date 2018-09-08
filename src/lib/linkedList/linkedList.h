@@ -1,11 +1,12 @@
 #ifndef __LINKED_LIST_H__
 #define __LINKED_LIST_H__
 
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
 
-typedef void (*VisitorFn) (void *data);
-typedef int (*CompareValueFn) (void *data, void *value);
+typedef void (*VisitorFn_void) (void *data, va_list ap);
+typedef int (*VisitorFn_int) (void *data, va_list ap);
 
 typedef struct _LinkedNode {
   void *data;
@@ -37,12 +38,12 @@ LinkedList push_LinkedList(LinkedList list, void *data);
 /**
  * Executes a function for each element in the LinkedList.
  */
-void forEach_LinkedList(LinkedList list, VisitorFn visitorFn);
+void forEach_LinkedList(LinkedList list, VisitorFn_void visitorFn_void, ...);
 
 /**
  * Fin an element in the list where the compare value fn returns true. 
  */
-void *find_LinkedList(LinkedList list, CompareValueFn compareValueFn, void *value);
+void *find_LinkedList(LinkedList list, VisitorFn_int visitorFn_int, ...);
 
 /**
  * Delete an element of the list.

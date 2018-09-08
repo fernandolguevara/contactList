@@ -1,4 +1,5 @@
 #include "linkedList.h"
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -38,17 +39,26 @@ LinkedList push_LinkedList(LinkedList list, void *data) {
   return list;
 }
 
-void forEach_LinkedList(LinkedList list, VisitorFn visitorFn) {
+void forEach_LinkedList(LinkedList list, VisitorFn_void visitorFn_void, ...) {
+  va_list ap;
+
   for (LinkedNode *node = list; node != NULL; node = node->next) {
-    visitorFn(node->data);
+    va_start(ap, visitorFn_void);
+    visitorFn_void(node->data, ap);
+    va_end(ap);
   }
 }
 
-void *find_LinkedList(LinkedList list, CompareValueFn compareValueFn, void *value) {
+void *find_LinkedList(LinkedList list, VisitorFn_int visitorFn_int, ...) {
+  va_list ap;
+
   for (LinkedNode *node = list; node != NULL; node = node->next) {
-    if (compareValueFn(node->data, value)) {
+    va_start(ap, visitorFn_int);
+    if (visitorFn_int(node->data, ap)) {
+      va_end(ap);
       return node->data;
     }
+    va_end(ap);
   }
 
   return NULL;

@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,40 +6,44 @@
 #include "../lib/contact/contact.h"
 
 /**
- * WRAPPERS (I could write a separate file...)
+ * WRAPPERS
  * To connect Contact with LinkeList.
  **/
 
-void print_Contact_wrapper(void *data) {
+void print_Contact_wrapper(void *data, va_list ap) {
   Contact contact = (Contact)data;
 
   print_Contact(contact);
   printf("______________________________________________\n");
 }
 
-void free_Contact_wrapper(void *data) {
+void free_Contact_wrapper(void *data, va_list ap) {
   Contact contact = (Contact)data;
 
   free_Contact(contact);
 }
 
-int compare_ContactPhoneByValue_wrapper(void *data, void *value) {
+int compare_ContactPhoneByValue_wrapper(void *data, va_list ap) {
   Contact contact = (Contact)data;
-  char* castedValue = (char*)value;
+  char* phone = va_arg(ap, char*);
 
-  return compare_ContactPhoneByValue(contact, castedValue) == 0;
+  return compare_ContactPhoneByValue(contact, phone) == 0;
+}
+
+void writeInFile_Contact_wrapper(void *data, va_list ap) {
+  Contact contact = (Contact)data;
+  FILE *f = va_arg(ap, FILE*);
+
+  fprintf(f, "%s\n%s\n%d\n%s\n%s\n%s\n%s\n", contact->firstName, contact->lastName, contact->age, contact->gender, contact->phone, contact->email, contact->birthday);
 }
 
 /**
- * UTIL (I could write a separate file...)
+ * UTIL
  * Some utilities.
  **/
 
 float averageAge_Contacts (LinkedList list) {
-  /** I wanted to declare a reduce_LinkedList function 
-   * that works as a fold to calculate the sum but I couldn't find the way to pass
-   * a function as parameter that returns a void pointer.
-   **/
+  // I wanted to declare a reduceToInt_LinkedList function
   int sum = 0;
   Contact contact;
 
@@ -63,15 +68,10 @@ char *convert_char_array_to_pointer(char array[]) {
 }
 
 /**
- * FILE READ/WRITE (I could write a separate file...)
+ * FILE READ/WRITE
  **/
 
 LinkedList importContacts(LinkedList list) {
-  /** I wanted to use the foreach_LinkedList function 
-   * but I did not know how to pass the FILE (as parameter?) to the VisitorFn
-   * before passing it to the foreach_LinkedList function.
-   **/
-
   FILE *f = fopen("contacts.txt", "r");
   Contact contact;
   char buffer[50];
@@ -108,10 +108,6 @@ LinkedList importContacts(LinkedList list) {
 }
 
 void exportContacts(LinkedList list) {
-  /** I wanted to use the foreach_LinkedList function 
-   * but I did not know how to pass the FILE (as parameter?) to the VisitorFn
-   * before passing it to the foreach_LinkedList function.
-   **/
   FILE *f = fopen("contacts.txt", "w");
   Contact contact; 
 
@@ -122,10 +118,7 @@ void exportContacts(LinkedList list) {
 
   fprintf(f, "%d\n", length_LinkedList(list));
 
-  for (LinkedNode *node = list; node != NULL; node = node->next) {
-    contact = (Contact)node->data;
-    fprintf(f, "%s\n%s\n%d\n%s\n%s\n%s\n%s\n", contact->firstName, contact->lastName, contact->age, contact->gender, contact->phone, contact->email, contact->birthday);
-  }
+  forEach_LinkedList(list, writeInFile_Contact_wrapper, f);
 
   fclose(f);
 }
@@ -216,7 +209,7 @@ int main(int argc, char *argv[]) {
         getchar();
         data = find_LinkedList(list, compare_ContactPhoneByValue_wrapper, buffer);
         if (data) {
-          print_Contact_wrapper(data);
+          print_Contact_wrapper(data, NULL);
         } else {
           printf("Not found.\n");
         }
@@ -276,7 +269,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  forEach_LinkedList(list, free_Contact_wrapper);
+  forEach_LinkedList(list, free_Contact_wrapper, NULL);
   free_LinkedList(list);
 
   return 0;
